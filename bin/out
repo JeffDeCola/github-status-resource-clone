@@ -1,0 +1,152 @@
+#!/bin/sh
+
+. $( dirname "$0" )/common.sh
+
+repipe
+load_source
+
+eval $( jq -r '{
+  "params_commit": .params.commit,
+  "params_state": .params.state,
+  "params_description": ( .params.description // "" ),
+  "params_description_path": ( .params.description_path // "" ),
+  "params_target_url": ( .params.target_url // ""),
+  "params_target_url_path": ( .params.target_url_path // "" )
+} | to_entries[] | .key + "=" + @sh "\(.value)"' < /tmp/stdin )
+
+
+#
+# validate
+#
+
+case "$params_state" in
+  error) true ;;
+  failure) true ;;
+  pending) true ;;
+  success) true ;;
+  *) fatal "Invalid parameter: state: $params_state"
+esac
+
+
+#
+# commit
+#
+
+if [ -d "$params_commit" ] ; then
+  commit=$( cat "$params_commit/.git/HEAD" )
+elif [ -f "$params_commit" ] ; then
+  commit=$( echo $( cat "$params_commit" ) )
+else
+  fatal "Invalid parameter: commit: $params_commit"
+fi
+
+
+#
+# description
+#
+
+description_path="/tmp/description"
+
+if [[ -n "$params_description" ]] ; then
+  echo "$params_description" > "$description_path"
+elif [[ -n "$params_description_path" ]] ; then
+  cp "$params_description_path" "$description_path"
+else
+  description_path="/dev/null"
+fi
+
+
+#
+# target_url
+#
+
+target_url='$ATC_EXTERNAL_URL/builds/$BUILD_ID'
+
+if [[ -n "$params_target_url" ]] ; then
+  target_url="$params_target_url"
+elif [[ -n "$params_target_url_path" ]] ; then
+  target_url="$( cat "$params_target_url_path" )"
+fi
+
+
+#
+# execute
+#
+
+jq -c -n \
+  --arg state "$params_state" \
+  --arg target_url "$( echo "$target_url" | buildtpl )" \
+  --arg description "$( cat $description_path )" \
+  --arg context "$source_context" \
+  '{
+    "context": $context,
+    "description": $description,
+    "state": $state,
+    "target_url": $target_url
+  } | to_entries | map( select( 0 < ( .value | length ) ) ) | from_entries' \
+    | curlgh -d@- "$source_endpoint/repos/$source_repository/statuses/$commit" \
+    > /tmp/gh-result
+
+#
+# check retry counter
+#
+
+REMAINING_TRIES=5
+
+while [[ $REMAINING_TRIES -gt 0 ]]; do
+
+#
+# lookup
+#
+
+curlgh "$source_endpoint/repos/$source_repository/commits/$source_branch/status" \
+  | jq -c \
+    --arg ref "$(jq -r '.id | tostring' < /tmp/gh-result)" \
+    '{
+      "sha": .sha,
+      "status": ( .statuses | map(select( $ref == ( .id | tostring ) )) | .[0] )
+    }' \
+    > /tmp/status
+
+#
+# validate
+#
+
+[[ -s /tmp/status ]] \
+  && jq -e '.status' < /tmp/status > /dev/null \
+  && break
+
+#
+# decrease retry counter and loop
+#
+
+REMAINING_TRIES=$(($REMAINING_TRIES - 1))
+
+sleep 1
+
+done
+
+#
+# concourse
+#
+
+jq -c \
+  --arg commit "$commit" \
+  '{
+    "version": {
+      "commit": $commit,
+      "status": ( .id | tostring )
+    },
+    "metadata": [
+      {
+        "name": "created_at",
+        "value": .created_at
+      },
+      {
+        "name": "created_by",
+        "value": .creator.login
+      }
+    ]
+  }' \
+    < /tmp/gh-result \
+    >&3
