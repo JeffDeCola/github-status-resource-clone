@@ -23,7 +23,7 @@ load_source () {
   eval $( jq -r '{
     "source_repository": .source.repository,
     "source_access_token": .source.access_token,
-    "source_branch": ( .source.branch // "master" ),
+    "source_branch": ( .source.branch // "main" ),
     "source_context": ( .source.context // "default" ),
     "source_endpoint": ( .source.endpoint // "https://api.github.com" ),
     "skip_ssl_verification": ( .source.skip_ssl_verification // "false" )

@@ -4,9 +4,32 @@ A [Concourse](http://concourse.ci/) [resource](http://concourse.ci/resources.htm
 
 ## JEFF ADDED
 
-**This repo was cloned from dpb587/github-status-resource.git.**
+**This repo was cloned from
+[dpb587/github-status-resource](https://github.com/dpb587/github-status-resource)**
 
-The repo was archived and is no longer maintained.
+That repo was archived and is no longer maintained.
+
+My image at dockerhub is
+[jeffdecola/github-status-resource-clone](https://hub.docker.com/r/jeffdecola/github-status-resource-clone/).
+
+```bash
+## BUILD DOCKER IMAGE
+docker build -t jeffdecola/github-status-resource-clone .
+
+## PUSH TO DOCKERHUB
+docker push jeffdecola/github-status-resource-clone
+
+## DEPLOY DOCKER IMAGE TO CONTAINER
+docker pull jeffdecola/github-status-resource-clone
+docker run --name github-status-resource-clone -dit jeffdecola/github-status-resource-clone
+
+## OTHER COMMANDS
+docker exec -i -t github-status-resource-clone /bin/bash
+docker logs -f github-status-resource-clone
+docker images
+docker ps
+```
+
 
 
 ## Configuration
