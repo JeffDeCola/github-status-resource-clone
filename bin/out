@@ -14,7 +14,6 @@ eval $( jq -r '{
   "params_target_url_path": ( .params.target_url_path // "" )
 } | to_entries[] | .key + "=" + @sh "\(.value)"' < /tmp/stdin )
 
-
 #
 # validate
 #

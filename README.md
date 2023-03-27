@@ -1,4 +1,4 @@
-# github-status-resource
+# github-status-resource-clone
 
 A [Concourse](http://concourse.ci/) [resource](http://concourse.ci/resources.html) to interact with the [GitHub Status](https://developer.github.com/v3/repos/statuses/) type.
 
@@ -13,11 +13,11 @@ My image at dockerhub is
 [jeffdecola/github-status-resource-clone](https://hub.docker.com/r/jeffdecola/github-status-resource-clone/).
 
 ```bash
-## BUILD DOCKER IMAGE
-docker build -t jeffdecola/github-status-resource-clone .
+## BUILD DOCKER IMAGE WITH TAG v0.0.2
+docker build -t jeffdecola/github-status-resource-clone:v0.0.2 .
 
-## PUSH TO DOCKERHUB
-docker push jeffdecola/github-status-resource-clone
+## PUSH TO DOCKERHUB TAG v0.0.2
+docker push jeffdecola/github-status-resource-clone:v0.0.2
 
 ## DEPLOY DOCKER IMAGE TO CONTAINER
 docker pull jeffdecola/github-status-resource-clone
@@ -30,6 +30,20 @@ docker images
 docker ps
 ```
 
+My Changes are:
+
+* CHECK
+  * Changed the default branch to `master` from `main`. Must update pipeline.
+* IN
+  * Nothing
+* OUT
+  * Nothing
+* DOCKERFILE
+  * Added ability to /bin/bash into container  
+
+## BELOW README IS ARCHIVED
+
+---
 
 
 ## Configuration
