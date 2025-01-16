@@ -1,1 +1,10 @@
-/ci/config/*
+# repo-generic-.gitignore
+
+# CONCOURSE SECRETS
+.credentials.yml
+
+# macOS
+.DS_Store
+
+# WINDOWS
+*.jpg:Zone.Identifier
