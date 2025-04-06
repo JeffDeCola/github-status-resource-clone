@@ -1,6 +1,9 @@
 # github-status-resource-clone
 
-A [Concourse](http://concourse.ci/) [resource](http://concourse.ci/resources.html) to interact with the [GitHub Status](https://developer.github.com/v3/repos/statuses/) type.
+A [Concourse](http://concourse.ci/)
+[resource](http://concourse.ci/resources.html)
+to interact with the
+[GitHub Status](https://developer.github.com/v3/repos/statuses/) type.
 
 ## JEFF ADDED
 
@@ -39,12 +42,11 @@ My Changes are:
 * OUT
   * Nothing
 * DOCKERFILE
-  * Added ability to /bin/bash into container  
+  * Added ability to /bin/bash into container
 
 ## BELOW README IS ARCHIVED
 
 ---
-
 
 ## Configuration
 
